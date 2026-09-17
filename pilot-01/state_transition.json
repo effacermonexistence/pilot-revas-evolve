@@ -1,0 +1,126 @@
+{
+  "_artifact_role": "REVAS state-transition artifact derived from the frozen Evolve control atom and live-state lineage.",
+  "representation_version": "0.1.0",
+  "source_freeze": {
+    "repository": "304KMoney/pilot-revas-evolve",
+    "commit": "149cb1cd02a747ce64639eba3a791d8e46670c08",
+    "canonical_inputs": [
+      "pilot-01/control_atom.json",
+      "pilot-01/live_state.json"
+    ],
+    "excluded_from_derivation": [
+      "pilot-01/request.json"
+    ]
+  },
+  "object_id": "pilot-01-synthetic-001",
+  "control_id": "PHI_ACCESS_001",
+  "evaluation_timestamp": "2026-09-17T12:00:05Z",
+  "observed_transitions": [
+    {
+      "sequence": 1,
+      "from_state": null,
+      "to_state": "candidate",
+      "timestamp": "2026-09-17T12:00:00Z",
+      "source": "AI_CDS_system",
+      "trigger": "AI-generated recommendation created",
+      "adoption_status": "candidate_only",
+      "provenance_hash": "sha256:a3f1c9e2b7d44081f0c6e5a3d8b2c1f9e4a7d3b1c8e5f2a9d6b3c0e7f4a1d8b5"
+    },
+    {
+      "sequence": 2,
+      "from_state": "candidate",
+      "to_state": "submitted_for_authorization",
+      "timestamp": "2026-09-17T12:00:04Z",
+      "source": "authorization_service",
+      "trigger": "candidate submitted for authorization review",
+      "adoption_status": "not_adopted"
+    },
+    {
+      "sequence": 3,
+      "from_state": "submitted_for_authorization",
+      "to_state": "pending_dual_authorization",
+      "timestamp": "2026-09-17T12:00:05Z",
+      "source": "authorization_service",
+      "trigger": "PHI_ACCESS_001.sensitive_category_check (organizational_policy)",
+      "snapshot": {
+        "primary_authority_verified": true,
+        "secondary_authority_verified": false,
+        "required_authority_set_complete": false,
+        "authorization_window_open": true,
+        "authorization_window_expired": false,
+        "authorization_event_logged": false,
+        "audit_trail_complete": false
+      },
+      "verification_state": "incomplete",
+      "adoption_gate_decision": "HOLD",
+      "adoption_status": "not_adopted"
+    }
+  ],
+  "current_transition_state": {
+    "state": "pending_dual_authorization",
+    "timestamp": "2026-09-17T12:00:05Z",
+    "adopted_state": null,
+    "verification_state": "incomplete",
+    "adoption_gate_decision": "HOLD"
+  },
+  "conditional_next_transitions": [
+    {
+      "branch": "adopt",
+      "from_state": "pending_dual_authorization",
+      "preconditions": [
+        "primary_authority_verified == true",
+        "secondary_authority_verified == true",
+        "required_authority_set_complete == true",
+        "minimum_necessary_logged == true",
+        "model_version_recorded == true",
+        "input_hash_recorded == true",
+        "output_hash_recorded == true",
+        "authorization_event_logged == true",
+        "audit_trail_complete == true"
+      ],
+      "gate_result": "ADOPT",
+      "effect": "Create adopted state and required TrustLedger receipt; only then may the candidate propagate into the governed health-record update path.",
+      "status": "not_executed"
+    },
+    {
+      "branch": "remain_on_hold",
+      "from_state": "pending_dual_authorization",
+      "preconditions": [
+        "required conditions remain incomplete",
+        "missing conditions remain satisfiable",
+        "authorization_window_open == true"
+      ],
+      "gate_result": "HOLD",
+      "effect": "Preserve candidate state and lineage; do not propagate to adopted state.",
+      "status": "current_branch"
+    },
+    {
+      "branch": "reject_and_quarantine",
+      "from_state": "pending_dual_authorization",
+      "preconditions": [
+        "authority cannot be confirmed OR required evidence is invalid, unconfirmable, or terminally incomplete"
+      ],
+      "gate_result": "REJECT",
+      "effect": "Reject and quarantine the candidate; preserve evidence and lineage for audit.",
+      "status": "not_triggered"
+    },
+    {
+      "branch": "post_adoption_reverification",
+      "from_adoption_status": "adopted",
+      "preconditions": [
+        "authorization is later found to be unauthorized"
+      ],
+      "gate_result": "ROLLBACK_REVERIFY",
+      "effect": "Flag downstream adopted states derived from the recommendation for reverification while preserving candidate state and lineage.",
+      "status": "conditional_future"
+    }
+  ],
+  "transition_invariants": [
+    "No transition may collapse candidate into adopted without the adoption gate.",
+    "Verify may establish incomplete/complete state but does not own HOLD/ADOPT/REJECT.",
+    "Primary and secondary authority states remain separately represented.",
+    "The sensitive-category dual-authorization trigger retains organizational-policy provenance.",
+    "Observed timestamps are preserved exactly from live_state.json.",
+    "A conditional future branch is not an executed transition."
+  ]
+}
