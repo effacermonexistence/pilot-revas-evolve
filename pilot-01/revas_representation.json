@@ -1,0 +1,158 @@
+{
+  "_artifact_role": "REVAS independent representation of the frozen Evolve constraint and live state. pilot-01/request.json was intentionally excluded from derivation.",
+  "representation_version": "0.1.0",
+  "source_freeze": {
+    "repository": "304KMoney/pilot-revas-evolve",
+    "commit": "149cb1cd02a747ce64639eba3a791d8e46670c08",
+    "canonical_inputs": [
+      {
+        "path": "pilot-01/control_atom.json",
+        "blob_sha": "00711601d681f7af29419f57b7773f038ad768d7"
+      },
+      {
+        "path": "pilot-01/live_state.json",
+        "blob_sha": "25501c5dd650847250b1412a4ecc28d2b11bce6d"
+      }
+    ],
+    "excluded_from_derivation": [
+      "pilot-01/request.json"
+    ],
+    "contract_clarification": {
+      "source": "Kiel Green email, 2026-09-17",
+      "scope": [
+        "Verify reports supported verification state; Adoption Gate owns the adoption decision.",
+        "Temporarily incomplete but still satisfiable maps to HOLD; invalid, unconfirmable, or terminally incomplete maps to REJECT.",
+        "Sensitive-category dual authorization is organizational policy layered on top of mapped framework requirements, not a direct HIPAA prescription."
+      ]
+    }
+  },
+  "object": {
+    "object_id": "pilot-01-synthetic-001",
+    "control_id": "PHI_ACCESS_001",
+    "control_version": "1.0.0",
+    "domain": "healthcare",
+    "evaluation_timestamp": "2026-09-17T12:00:05Z",
+    "current_state": "pending_dual_authorization",
+    "adopted_state": null
+  },
+  "constraint": {
+    "description": "AI-generated recommendations affecting PHI must not be adopted into the health record without explicit human authorization from a credentialed clinician with documented authority over the patient record.",
+    "scope": "Any AI system output that would result in creation, modification, or deletion of protected health information in an EHR.",
+    "severity": "critical",
+    "posture_score_weight": 0.18,
+    "attestation_metadata": {
+      "last_attested": null,
+      "attested_by": null,
+      "evidence_file_ids": [],
+      "posture_contribution": "18% of overall AI governance posture score for healthcare domain"
+    }
+  },
+  "authority_and_policy": {
+    "framework_mappings": [
+      {
+        "framework": "HIPAA",
+        "reference": "§164.312(a)(1)",
+        "requirement": "Unique user identification and access control for PHI systems"
+      },
+      {
+        "framework": "NIST_AI_RMF",
+        "reference": "GOVERN-1.1",
+        "requirement": "Policies for AI risk management established and communicated"
+      },
+      {
+        "framework": "ISO_42001",
+        "reference": "6.1.2",
+        "requirement": "AI risk assessment — identify risks to individuals from AI system outputs"
+      }
+    ],
+    "authority_requirements": [
+      "Approving actor must hold a valid clinical credential recognized by the organization",
+      "Approving actor must have documented access authority for the specific patient record",
+      "Dual authorization required if patient is flagged as sensitive category (mental health, substance abuse, HIV/AIDS)"
+    ],
+    "dual_authorization_layer": {
+      "required": true,
+      "source_type": "organizational_policy",
+      "source_statement": "sensitive_category == true (mental health diagnosis)",
+      "framework_boundary": "HIPAA §164.312(a)(1) is preserved as an access-control framework mapping. The sensitive-category dual-authorization rule is preserved separately as organizational policy."
+    }
+  },
+  "evidence_requirements": [
+    "Minimum necessary standard must be satisfied — AI system must log which PHI fields were accessed to generate the recommendation",
+    "Model version, input hash, and output hash must be recorded before authorization is requested",
+    "Authorization event must be logged with actor identity, timestamp, and reason code"
+  ],
+  "live_verification": {
+    "verification_state": "incomplete",
+    "authority_state": {
+      "primary_authority_verified": true,
+      "primary_authority_source": "EHR access control list — verified against patient record",
+      "secondary_authority_verified": false,
+      "secondary_authority_source": null,
+      "required_authority_set_complete": false,
+      "dual_authorization_required": true,
+      "dual_authorization_required_source": "organizational_policy — sensitive_category == true (mental health diagnosis)",
+      "authorization_window_open": true,
+      "authorization_window_expired": false
+    },
+    "evidence_state": {
+      "minimum_necessary_logged": true,
+      "model_version_recorded": true,
+      "input_hash_recorded": true,
+      "output_hash_recorded": true,
+      "authorization_event_logged": false,
+      "audit_trail_complete": false
+    },
+    "blocking_gaps": [
+      "secondary_authority_verified == false",
+      "required_authority_set_complete == false",
+      "authorization_event_logged == false",
+      "audit_trail_complete == false"
+    ],
+    "conflicting_representations_detected": false
+  },
+  "route_and_adoption": {
+    "candidate_state_must_be_preserved": true,
+    "candidate_may_be_evaluated": true,
+    "candidate_may_be_adopted_now": false,
+    "adoption_gate_owner": "PHI_ACCESS_001.constraint.adoption_gate",
+    "gate_decision": "HOLD",
+    "gate_reason": "Required authorization and evidence are incomplete, but the authorization window remains open and the missing conditions are still satisfiable.",
+    "condition_for_adoption": "All authority_requirements and evidence_requirements satisfied",
+    "condition_for_escalation": "Dual authorization required if sensitive_category == true",
+    "reject_boundary": "REJECT and quarantine if authority cannot be confirmed or the required evidence becomes invalid, unconfirmable, or terminally incomplete.",
+    "adopted_state_requires_receipt": true,
+    "receipt_format": "TrustLedger — SHA-256 hash of adopted state, anchored to external timestamp, linked to authorization event",
+    "rollback_trigger": "If authorization is later found to be unauthorized, all downstream adopted states derived from this recommendation must be flagged for reverification"
+  },
+  "semantic_invariants": [
+    "candidate_state != adopted_state",
+    "verification_state != adoption_decision",
+    "known primary authority must remain preserved when secondary authority is missing",
+    "organizational_policy != framework_requirement",
+    "current_state must remain timestamp-aligned with the evaluation snapshot",
+    "no adoption without complete required authority and evidence",
+    "no silent loss of provenance or state lineage"
+  ],
+  "state_lineage": [
+    {
+      "state": "candidate",
+      "source": "AI_CDS_system",
+      "timestamp": "2026-09-17T12:00:00Z",
+      "provenance_hash": "sha256:a3f1c9e2b7d44081f0c6e5a3d8b2c1f9e4a7d3b1c8e5f2a9d6b3c0e7f4a1d8b5"
+    },
+    {
+      "state": "submitted_for_authorization",
+      "source": "authorization_service",
+      "timestamp": "2026-09-17T12:00:04Z",
+      "provenance_hash": null
+    },
+    {
+      "state": "pending_dual_authorization",
+      "source": "authorization_service",
+      "timestamp": "2026-09-17T12:00:05Z",
+      "trigger": "PHI_ACCESS_001.sensitive_category_check (organizational_policy)",
+      "provenance_hash": null
+    }
+  ]
+}
